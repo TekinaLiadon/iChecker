@@ -1,0 +1,16 @@
+{
+  "name": "iChecker",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "bun run --watch 01-app/index.ts",
+    "start": "NODE_ENV=production bun 01-app/index.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "module": true
+}
