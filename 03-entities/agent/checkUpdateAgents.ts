@@ -13,12 +13,12 @@ export default async (): Promise<AgentInfo[]> => {
     const updateFieldNumbers: number[] = [];
     for (let obj of fullAgentsList) {
         const result = await sql.unsafe(`
-        SELECT field_number, last_modified
+        SELECT field_number, exclusion_date
         FROM agents
         WHERE field_number = ${obj.field_1_i}`); // Экранировать
 
         if(result.length === 0) mismatchedFieldNumbers.push(obj.field_1_i);
-        else if (Number(result[0].last_modified) !== obj.lastModified_l) {
+        else if (result[0].exclusion_date !== obj.field_5_s) {
             updateFieldNumbers.push(obj.field_1_i);
         }
     }
@@ -39,7 +39,7 @@ export default async (): Promise<AgentInfo[]> => {
             .join(','); // Экранировать
         await sql.unsafe(`INSERT INTO agents (${fields.join(', ')}) VALUES ${values};`);
     }
-    if(resultUpdate.length > 0) await sql`UPDATE agents SET last_modified =${resultUpdate[0].lastModified_l} WHERE field_number IN ${sql(updateFieldNumbers)}`
+    if(resultUpdate.length > 0) await sql`UPDATE agents SET exclusion_date =${resultUpdate[0].field_5_s} WHERE field_number IN ${sql(updateFieldNumbers)}`
 
     return [...resultNew, ...resultUpdate]
 }

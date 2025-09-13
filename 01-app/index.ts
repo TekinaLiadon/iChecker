@@ -5,6 +5,7 @@ import checkTime from "../04-shared/utils/checkTime";
 import checkUpdateAgents from "../03-entities/agent/checkUpdateAgents";
 import getSoloAgent from "../03-entities/agent/getSoloAgent";
 import createAgentMessage from "../04-shared/utils/createAgentMessage";
+import getPersonList from "../03-entities/kinopoisk/getPersonList";
 
 const bot = new Telegraf(Bun.env.BOT_TOKEN)
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -13,13 +14,15 @@ var workInterval
 var sendMessage = async () => {
     const agentsList = await checkUpdateAgents()
     if(agentsList.length === 0) return
-    const messageList = agentsList.map((agent, index) => {
+    const messageList = await Promise.all(agentsList.map(async (agent, index) => {
+        const person = await getPersonList(agent.field_2_s)
         return createAgentMessage({
             agent,
             index,
             agentsList,
+            person: person === '-' ? person : person,
         })
-    })
+    }))
     messageList.forEach((el, index) => {
         setTimeout(() => bot.telegram.sendMessage(Bun.env.BOT_CHAT, el, { parse_mode: 'HTML' }), 500 * index)
     })
@@ -38,8 +41,10 @@ const start = async (): Promise<void> => {
                 ctx.reply('Использование: /search Имя');
             } else {
                 const result = await getSoloAgent(name)
+                const person = await getPersonList(result.name)
                 result ? ctx.reply(createAgentMessage({
-                    agent: result
+                    agent: result,
+                    person: person === '-' ? person : person,
                 }), { parse_mode: 'HTML' }) : ctx.reply('Ничего не найдено')
             }
         });
