@@ -19,7 +19,7 @@ export default async () => {
     adoption_date TEXT,
     exclusion_date TEXT,
     domain_name TEXT,
-    last_modified BIGINT NOT NULL);`
+    last_modified BIGINT NOT NULL);` // ALTER TABLE agents ADD COLUMN cinema_list int[];
 
 
     const fields = [  'field_number', 'name', 'article',

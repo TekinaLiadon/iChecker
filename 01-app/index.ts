@@ -1,4 +1,4 @@
-import { Telegraf } from 'telegraf'
+import {Telegraf} from 'telegraf'
 import startTask from "../04-shared/utils/startTask";
 import createDatabase from "../03-entities/agent/createDatabase";
 import checkTime from "../04-shared/utils/checkTime";
@@ -13,7 +13,7 @@ var workInterval
 
 var sendMessage = async () => {
     const agentsList = await checkUpdateAgents()
-    if(agentsList.length === 0) return
+    if (agentsList.length === 0) return
     const messageList = await Promise.all(agentsList.map(async (agent, index) => {
         const person = await getPersonList(agent.field_2_s)
         return createAgentMessage({
@@ -24,7 +24,7 @@ var sendMessage = async () => {
         })
     }))
     messageList.forEach((el, index) => {
-        setTimeout(() => bot.telegram.sendMessage(Bun.env.BOT_CHAT, el, { parse_mode: 'HTML' }), 500 * index)
+        setTimeout(() => bot.telegram.sendMessage(Bun.env.BOT_CHAT, el, {parse_mode: 'HTML'}), 500 * index)
     })
 }
 const start = async (): Promise<void> => {
@@ -38,23 +38,44 @@ const start = async (): Promise<void> => {
         bot.command('search', async (ctx) => {
             const name = ctx.message.text.split(' ').slice(1).join(' ')
             if (!name) {
-                ctx.reply('Использование: /search Имя');
+                ctx.reply('Использование: /search Фамилия');
             } else {
-                const result = await getSoloAgent(name)
+                const {agent: result, number} = await getSoloAgent(name)
+                let keyboard
+                if (number > 1) {
+                    keyboard = new Array(number > 3 ? 3 : number ).fill(null).map((el, index) => {
+                        return [{text: `Вариант ${index + 2}`, callback_data: `agent_${index + 1}_${name}`}]
+                    })
+                }
+                if(result?.cinema_list) {
+                    // TODO
+                }
                 const person = await getPersonList(result.name)
                 result ? ctx.reply(createAgentMessage({
                     agent: result,
                     person: person === '-' ? person : person,
-                }), { parse_mode: 'HTML' }) : ctx.reply('Ничего не найдено')
+                }), {parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard},}) : ctx.reply('Ничего не найдено')
             }
+        });
+        bot.action(/^agent_/, async (ctx) => {
+            const callbackData = ctx.callbackQuery.data;
+            const [number, name] = callbackData.split('_').splice(1)
+            const {agent} = await getSoloAgent(name, number)
+            const person = await getPersonList(agent.name)
+            agent ? ctx.reply(createAgentMessage({
+                agent,
+                person: person === '-' ? person : person,
+            }), {parse_mode: 'HTML',}) : ctx.reply('Ничего не найдено')
+            ctx.answerCbQuery();
+            ctx.reply(`Нажата кнопка с callback_data: ${callbackData}`);
         });
         await createDatabase()
         const task = async () => {
             workInterval = setInterval(async () => {
-                if(!checkTime()) return
+                if (!checkTime()) return
                 await sendMessage()
             }, 3600000)
-            if(!checkTime()) return
+            if (!checkTime()) return
             await sendMessage()
         }
         startTask(task)
@@ -67,13 +88,13 @@ const start = async (): Promise<void> => {
 start()
 
 process.once('SIGINT', () => {
-    if(workInterval) clearInterval(workInterval)
+    if (workInterval) clearInterval(workInterval)
     bot.stop('SIGINT')
     console.log('Пользователь завершил работу бота')
     process.exit(0)
 })
 process.once('SIGTERM', () => {
-    if(workInterval) clearInterval(workInterval)
+    if (workInterval) clearInterval(workInterval)
     bot.stop('SIGTERM')
     console.log('Система завершила работу бота')
     process.exit(0)
