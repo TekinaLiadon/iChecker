@@ -15,16 +15,16 @@ var sendMessage = async () => {
     const agentsList = await checkUpdateAgents()
     if (agentsList.length === 0) return
     const messageList = await Promise.all(agentsList.map(async (agent, index) => {
-        const person = await getPersonList(agent.field_2_s)
+        const person = await getPersonList(agent.field_2_s, agent.birthday)
         return createAgentMessage({
             agent,
             index,
             agentsList,
-            person: person === '-' ? person : person,
+            person,
         })
     }))
     messageList.forEach((el, index) => {
-        setTimeout(() => bot.telegram.sendMessage(Bun.env.BOT_CHAT, el, {parse_mode: 'HTML'}), 500 * index)
+        setTimeout(() => bot.telegram.sendMessage(Bun.env.BOT_CHAT, el, {parse_mode: 'HTML'}), 1000 * index)
     })
 }
 const start = async (): Promise<void> => {
@@ -43,14 +43,14 @@ const start = async (): Promise<void> => {
                 const {agent: result, number} = await getSoloAgent(name)
                 let keyboard
                 if (number > 1) {
-                    keyboard = new Array(number > 3 ? 3 : number ).fill(null).map((el, index) => {
+                    keyboard = new Array(number > 4 ? 3 : number - 1 ).fill(null).map((el, index) => {
                         return [{text: `Вариант ${index + 2}`, callback_data: `agent_${index + 1}_${name}`}]
                     })
                 }
-                if(result?.cinema_list) {
-                    // TODO
-                }
-                const person = await getPersonList(result.name)
+                let person
+                if(result?.kinopoisk_info) {
+                    person = result.kinopoisk_info
+                } else person = await getPersonList(result.name, result.birthday ,result.id)
                 result ? ctx.reply(createAgentMessage({
                     agent: result,
                     person: person === '-' ? person : person,
@@ -61,13 +61,15 @@ const start = async (): Promise<void> => {
             const callbackData = ctx.callbackQuery.data;
             const [number, name] = callbackData.split('_').splice(1)
             const {agent} = await getSoloAgent(name, number)
-            const person = await getPersonList(agent.name)
+            let person
+            if(agent?.kinopoisk_info) {
+                person = agent.kinopoisk_info
+            } else person = await getPersonList(agent.name, agent.birthday , agent.id)
             agent ? ctx.reply(createAgentMessage({
                 agent,
                 person: person === '-' ? person : person,
             }), {parse_mode: 'HTML',}) : ctx.reply('Ничего не найдено')
             ctx.answerCbQuery();
-            ctx.reply(`Нажата кнопка с callback_data: ${callbackData}`);
         });
         await createDatabase()
         const task = async () => {

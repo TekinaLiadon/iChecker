@@ -14,17 +14,18 @@ export default async () => {
     await sql`CREATE TABLE agents (
     id SERIAL PRIMARY KEY,
     field_number INTEGER NOT NULL,
-    name TEXT NOT NULL,
+    name VARCHAR(256) NOT NULL,
     article TEXT NOT NULL,
-    adoption_date TEXT,
-    exclusion_date TEXT,
+    adoption_date VARCHAR(256),
+    exclusion_date VARCHAR(256),
     domain_name TEXT,
-    last_modified BIGINT NOT NULL);` // ALTER TABLE agents ADD COLUMN cinema_list int[];
-
+    kinopoisk_info jsonb,
+    birthday VARCHAR(64),
+    last_modified BIGINT NOT NULL);`
 
     const fields = [  'field_number', 'name', 'article',
         'adoption_date', 'exclusion_date',
-        'domain_name', 'last_modified'
+        'domain_name', 'last_modified', 'birthday'
     ];
 
     const escapePG = str => typeof str === "string" ? str.replace(/'/g, "''") : str;
@@ -37,7 +38,8 @@ export default async () => {
     '${escapePG(item.field_4_s)}',
     '${escapePG(item.field_5_s)}',
     '${escapePG(item.field_6_s)}',
-    '${escapePG(item.lastModified_l)}'
+    '${escapePG(item.lastModified_l)}',
+    '${escapePG(item.field_12_s)}'
   )`)
         .join(','); // Экранировать
 

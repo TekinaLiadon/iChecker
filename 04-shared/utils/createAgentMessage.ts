@@ -29,6 +29,6 @@ export default (options): string => {
 <b>Дата добавления:</b> ${newAgent.field_4_s}
 <b>Дата удаления:</b> ${newAgent.field_5_s ? newAgent.field_5_s : '-'}
 <b>Ссылки:</b> ${newAgent.field_6_s ? newAgent.field_6_s.split('; ').map(url => `<a href="${url}">${url}</a>`).join('\n') : '-'}
-<b>Кинопоиск (Ближайшие совпадения): ${newAgent.person === '-' || newAgent.person.length === 0 || !newAgent.person
-        ? newAgent.person : newAgent.person.map(el => `<a href="https://www.kinopoisk.ru/name/${el.id}">${el.name}</a>`).join('\n')}</b>`
+<b>Кинопоиск:</b> ${newAgent.person === '-' || newAgent.person.length === 0 || !newAgent.person
+        ? 'Не найдено совпадений по дню рождения' : newAgent.person.map(el => `<a href="https://www.kinopoisk.ru/name/${el.id}">${el.name}</a>`).join('\n')}`
 }

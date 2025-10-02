@@ -4,7 +4,7 @@ import { sql } from "bun";
 
 var fields = [  'field_number', 'name', 'article',
     'adoption_date', 'exclusion_date',
-    'domain_name', 'last_modified'
+    'domain_name', 'last_modified','birthday'
 ];
 export default async (): Promise<AgentInfo[]> => {
     const fullAgentsList: Promise<AgentInfo[]> = await getAgent()
@@ -34,7 +34,8 @@ export default async (): Promise<AgentInfo[]> => {
                '${escapePG(item.field_4_s)}',
                '${escapePG(item.field_5_s)}',
                '${escapePG(item.field_6_s)}',
-               '${escapePG(item.lastModified_l)}'
+               '${escapePG(item.lastModified_l)}',
+               '${escapePG(item.field_12_s)}'
            )`)
             .join(','); // Экранировать
         await sql.unsafe(`INSERT INTO agents (${fields.join(', ')}) VALUES ${values};`);
