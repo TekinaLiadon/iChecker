@@ -82,7 +82,6 @@ const start = async (): Promise<void> => {
             await sendMessage()
         }
         startTask(task)
-        await sendMessage()
         await bot.launch();
     } catch (err) {
         console.error("Не удалось запустить бота", err);

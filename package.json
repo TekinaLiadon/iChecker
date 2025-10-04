@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "bun run --watch 01-app/index.ts",
-    "start": "NODE_ENV=production bun 01-app/index.ts",
+    "build_server": "bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile server \\\n\t./01-app/index.ts",
+    "start": "./server",
     "test": "bun test"
   },
   "dependencies": {
