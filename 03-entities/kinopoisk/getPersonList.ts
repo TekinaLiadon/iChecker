@@ -63,11 +63,13 @@ export default async (query: string, birthday:string, id: number) => {
     result = result.filter((el) => {
         return areDatesEqual(el.birthday, birthday)
     })
-    const dataSave = result.map((el) => {
-        el.timestamp = Date.now()
-        return el
-    })
-    await sql`UPDATE agents SET kinopoisk_info = ${dataSave}::jsonb WHERE id = ${id};`
+    if(id) {
+        const dataSave = result.map((el) => {
+            el.timestamp = Date.now()
+            return el
+        })
+        await sql`UPDATE agents SET kinopoisk_info = ${dataSave}::jsonb WHERE id = ${id};`
+    }
     if (result.length === 0) return []
     return result
 }

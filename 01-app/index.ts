@@ -15,7 +15,7 @@ var sendMessage = async () => {
     const agentsList = await checkUpdateAgents()
     if (agentsList.length === 0) return
     const messageList = await Promise.all(agentsList.map(async (agent, index) => {
-        const person = await getPersonList(agent.field_2_s, agent.birthday)
+        const person = await getPersonList(agent.field_2_s, agent.field_12_s)
         return createAgentMessage({
             agent,
             index,
@@ -41,6 +41,7 @@ const start = async (): Promise<void> => {
                 ctx.reply('Использование: /search Фамилия');
             } else {
                 const {agent: result, number} = await getSoloAgent(name)
+                if (result.length === 0) ctx.reply('Ничего не найдено')
                 let keyboard
                 if (number > 1) {
                     keyboard = new Array(number > 4 ? 3 : number - 1 ).fill(null).map((el, index) => {
@@ -81,6 +82,7 @@ const start = async (): Promise<void> => {
             await sendMessage()
         }
         startTask(task)
+        await sendMessage()
         await bot.launch();
     } catch (err) {
         console.error("Не удалось запустить бота", err);
