@@ -9,6 +9,16 @@ var nameCheck = (str: string): string => {
     const [firstName, lastName] = str.trim().split(/\s+/)
     if(!/^[А-ЯЁA-Z]/.test(firstName) || !/^[А-ЯЁA-Z]/.test(lastName)) return '-'
     if(wordsListExceptions.includes(firstName.toLowerCase()) || wordsListExceptions.includes(lastName.toLowerCase())) return '-'
+    const quotedTextMatch = str.match(/"([^"]+)"/)
+    if(quotedTextMatch) {
+        const words = quotedTextMatch[1].match(/\b\w+\b/g);
+
+        const wordsWithoutBrackets = words.filter(word => {
+            const regex = new RegExp(`\\(${word}\\)|\\(${word}|${word}\\)`);
+            return !regex.test(quotedTextMatch[1]);
+        });
+        return wordsWithoutBrackets.join('')
+    }
     return `${lastName} ${firstName}`
 }
 function areDatesEqual(date1, date2) {

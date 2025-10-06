@@ -41,7 +41,7 @@ const start = async (): Promise<void> => {
                 ctx.reply('Использование: /search Фамилия');
             } else {
                 const {agent: result, number} = await getSoloAgent(name)
-                if (result.length === 0) ctx.reply('Ничего не найдено')
+                if (!result) return ctx.reply('Ничего не найдено')
                 let keyboard
                 if (number > 1) {
                     keyboard = new Array(number > 4 ? 3 : number - 1 ).fill(null).map((el, index) => {
@@ -54,7 +54,7 @@ const start = async (): Promise<void> => {
                 } else person = await getPersonList(result.name, result.birthday ,result.id)
                 result ? ctx.reply(createAgentMessage({
                     agent: result,
-                    person: person === '-' ? person : person,
+                    person: person,
                 }), {parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard},}) : ctx.reply('Ничего не найдено')
             }
         });
