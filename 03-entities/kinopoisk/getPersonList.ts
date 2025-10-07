@@ -1,12 +1,9 @@
 import {Query} from "./type";
 import {sql} from "bun";
+import wordsListExceptions from "../../04-shared/enums/wordsListExceptions";
 
-var wordsListExceptions = ["проект", "сетевой", "интернет-портал", "общественное", "движение",
-    "медиапроект", "международная", "организация", "издание", "общество", "центр", "исследовательский",
-    "антивоенное", "этническое", "интернет-издание", "благотворительный", "фонд", "некоммерческое",
-    "партнерство",]
 var nameCheck = (str: string): string => {
-    const [firstName, lastName] = str.trim().split(/\s+/)
+    const [firstName, lastName]= str.trim().split(/\s+/)
     if(!/^[А-ЯЁA-Z]/.test(firstName) || !/^[А-ЯЁA-Z]/.test(lastName)) return '-'
     if(wordsListExceptions.includes(firstName.toLowerCase()) || wordsListExceptions.includes(lastName.toLowerCase())) return '-'
     const quotedTextMatch = str.match(/"([^"]+)"/)

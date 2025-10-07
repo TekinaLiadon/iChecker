@@ -1,8 +1,10 @@
 import getAgent from './index'
 import { sql } from "bun";
 import { AgentInfo} from "./type";
+import fields from "../../04-shared/enums/fields";
+import getStrPg from "../../04-shared/utils/getStrPg";
 
-export default async () => {
+export default async (): Promise<void> => {
     const [data] = await sql`SELECT EXISTS (
         SELECT 1
         FROM information_schema.tables
@@ -23,25 +25,7 @@ export default async () => {
     birthday VARCHAR(64),
     last_modified BIGINT NOT NULL);`
 
-    const fields = [  'field_number', 'name', 'article',
-        'adoption_date', 'exclusion_date',
-        'domain_name', 'last_modified', 'birthday'
-    ];
-
-    const escapePG = str => typeof str === "string" ? str.replace(/'/g, "''") : str;
-
-    const values = fullAgentsList
-        .map(item => `(
-    '${escapePG(item.field_1_i)}',
-    '${escapePG(item.field_2_s)}',
-    '${escapePG(item.field_3_s)}',
-    '${escapePG(item.field_4_s)}',
-    '${escapePG(item.field_5_s)}',
-    '${escapePG(item.field_6_s)}',
-    '${escapePG(item.lastModified_l)}',
-    '${escapePG(item.field_12_s)}'
-  )`)
-        .join(','); // Экранировать
+    const values = getStrPg(fullAgentsList)
 
     await sql.unsafe(`INSERT INTO agents (${fields.join(', ')}) VALUES ${values};`);
 }

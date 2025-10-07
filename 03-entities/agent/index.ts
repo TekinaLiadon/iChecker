@@ -10,7 +10,7 @@ var requiredFields: string[] = [  "field_1_i",
     "field_12_s", // 16.08.1982
     "lastModified_l"
 ];
-const getAgent = async (offset : number = 0) => {
+const getAgent = async (offset : number = 0): Promise<AgentInfo[]> => {
     var data : Body= {
         facets: {},
         limit: 200,
@@ -32,7 +32,7 @@ const getFullAgent = async (): Promise<AgentInfo> => {
     const total: number = startCheck.size;
     const promises = [];
 
-    for (let offset = 200; offset < total; offset += 200) {
+    for (let offset: number = 200; offset < total; offset += 200) {
         promises.push(getAgent(offset));
     }
 
@@ -45,6 +45,6 @@ const getFullAgent = async (): Promise<AgentInfo> => {
             )
         )
     );
-    return fullAgentsList //  lastModified_l
+    return fullAgentsList
 }
 export default getFullAgent
