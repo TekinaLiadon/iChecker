@@ -16,6 +16,7 @@ export default async (bot: Telegraf<Context>): Promise<void> => {
             person,
         })
     }))
+    console.log(messageList)
     messageList.forEach((el: string, index: number): void => {
         setTimeout(() => bot.telegram.sendMessage(Bun.env.BOT_CHAT, el, {parse_mode: 'HTML'}), 1000 * index)
     })

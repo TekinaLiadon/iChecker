@@ -28,6 +28,6 @@ export default async (): Promise<AgentInfo[]> => {
         await sql.unsafe(`INSERT INTO agents (${fields.join(', ')}) VALUES ${values};`);
     }
     if(resultUpdate.length > 0) await sql`UPDATE agents SET exclusion_date =${resultUpdate[0].field_5_s} WHERE field_number IN ${sql(updateFieldNumbers)}`
-
+    console.log(resultNew[0])
     return [...resultNew, ...resultUpdate]
 }
