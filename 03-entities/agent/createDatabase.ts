@@ -11,7 +11,6 @@ export default async (): Promise<void> => {
         WHERE table_schema = 'public'
           AND table_name = 'agents'
         ) AS table_exists;`
-    console.log(data)
     if(data.table_exists) return
     const fullAgentsList: Promise<AgentInfo> = await getAgent()
     await sql`CREATE TABLE agents (
@@ -27,7 +26,6 @@ export default async (): Promise<void> => {
     last_modified BIGINT NOT NULL);`
 
     const values = getStrPg(fullAgentsList)
-    console.log('s')
 
     await sql.unsafe(`INSERT INTO agents (${fields.join(', ')}) VALUES ${values};`);
 }
