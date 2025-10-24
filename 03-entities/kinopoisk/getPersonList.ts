@@ -71,7 +71,6 @@ export default async (query: string, birthday:string, id: number) => {
     result = result.filter((el) => {
         return areDatesEqual(el.birthday, birthday)
     })
-    console.log(result)
     if(id) {
         const dataSave = result.map((el) => {
             el.timestamp = Date.now()
