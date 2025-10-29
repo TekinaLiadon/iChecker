@@ -25,12 +25,12 @@ const start = async (): Promise<void> => {
             workInterval = setInterval(async () => {
                 if (!checkTime()) return
                 await sendMessage(bot)
-            }, 3600000)
+            }, 1800000)
             if (!checkTime()) return
             await sendMessage(bot)
         }
         startTask(task)
-            //await sendMessage(bot)
+        //await sendMessage(bot)
         await bot.launch();
     } catch (err) {
         console.error("Не удалось запустить бота", err);
