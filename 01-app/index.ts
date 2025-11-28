@@ -30,7 +30,7 @@ const start = async (): Promise<void> => {
             await sendMessage(bot)
         }
         startTask(task)
-        //await sendMessage(bot)
+        await sendMessage(bot)
         await bot.launch();
     } catch (err) {
         console.error("Не удалось запустить бота", err);
