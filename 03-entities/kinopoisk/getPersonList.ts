@@ -7,14 +7,16 @@ var nameCheck = (str: string): string => {
     if(!/^[А-ЯЁA-Z]/.test(firstName) || !/^[А-ЯЁA-Z]/.test(lastName)) return '-'
     if(wordsListExceptions.includes(firstName.toLowerCase()) || wordsListExceptions.includes(lastName.toLowerCase())) return '-'
     const quotedTextMatch = str.match(/"([^"]+)"/)
-    if(quotedTextMatch && quotedTextMatch[1]) {
-        const words = quotedTextMatch[1].match(/\b\w+\b/g);
-        if(words) {
-            const wordsWithoutBrackets = words.filter(word => {
-                const regex = new RegExp(`\\(${word}\\)|\\(${word}|${word}\\)`);
-                return !regex.test(quotedTextMatch[1]);
-            });
-            return wordsWithoutBrackets.join('')
+    if(quotedTextMatch) {
+        if(quotedTextMatch[1]) {
+            const words = quotedTextMatch[1]?.match(/\b\w+\b/g);
+            if(words) {
+                const wordsWithoutBrackets = words.filter(word => {
+                    const regex = new RegExp(`\\(${word}\\)|\\(${word}|${word}\\)`);
+                    return !regex.test(quotedTextMatch[1]);
+                });
+                return wordsWithoutBrackets.join('')
+            }
         }
     }
     return `${lastName} ${firstName}`
