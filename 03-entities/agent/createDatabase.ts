@@ -21,9 +21,16 @@ export default async (): Promise<void> => {
     adoption_date VARCHAR(256),
     exclusion_date VARCHAR(256),
     domain_name TEXT,
+    type_agent VARCHAR(256),
     kinopoisk_info jsonb,
     birthday VARCHAR(64),
     last_modified BIGINT NOT NULL);`
+    await sql`CREATE TABLE info (
+    id SERIAL PRIMARY KEY,
+    img VARCHAR(256),
+    description TEXT,
+    agent_id INTEGER UNIQUE REFERENCES agents(id) ON DELETE CASCADE
+    );`
 
     const values = getStrPg(fullAgentsList)
 

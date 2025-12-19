@@ -7,6 +7,7 @@ var requiredFields: string[] = [  "field_1_i",
     "field_4_s",
     "field_5_s",
     "field_6_s",
+    "field_7_s",
     "field_12_s", // 16.08.1982
     "lastModified_l"
 ];

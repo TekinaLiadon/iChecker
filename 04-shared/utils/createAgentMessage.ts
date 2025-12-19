@@ -6,7 +6,31 @@ var renameMap = {
     adoption_date: 'field_4_s',
     exclusion_date: 'field_5_s',
     domain_name: 'field_6_s',
+    type_agent: 'field_7_s',
+    description: 'description',
 };
+
+const formatAgent = (agent, index, agentsListLength) => {
+    const header = index ? `<b>Изменение списка</b> (${index + 1}/${agentsListLength})` : '<b>Найденная информация</b>'
+    const links = agent.field_6_s
+        ? agent.field_6_s.split('; ').map(url => `<a href="${url}">${url}</a>`).join('\n')
+        : '-';
+
+    const kinopoisk = !agent.person || agent.person === '-' || agent.person.length === 0
+        ? 'Не найдено совпадений по дню рождения'
+        : agent.person.map(el => `<a href="https://www.kinopoisk.ru/name/${el.id}">${el?.name || el?.enName}</a>`).join('\n');
+    return `
+        ${header}
+<b>Номер:</b> ${agent.field_1_i}
+<b>ФИО:</b> ${agent.field_2_s}
+<b>Основание:</b> ${agent.field_3_s}
+<b>Дата добавления:</b> ${agent.field_4_s}
+<b>Дата удаления:</b> ${agent.field_5_s || '-'}
+<b>Ссылки:</b> ${links}
+<b>Тип агента:</b> ${agent?.field_7_s}
+<b>Описание:</b> ${agent?.description ? agent?.description : '-'}
+<b>Кинопоиск:</b> ${kinopoisk}`;
+}
 
 export default (options): string => {
     const {agent, index, agentsList, person} = options
@@ -19,16 +43,5 @@ export default (options): string => {
     )
     } else newAgent = agent
     newAgent.person = person
-    const header = index ? `<b>Изменение списка</b> (${index + 1}/${agentsList.length})` : '<b>Найденная информация</b>'
-    return `
-            ${header}
-            
-<b>Номер:</b> ${newAgent.field_1_i}
-<b>ФИО:</b> ${newAgent.field_2_s}
-<b>Основание:</b> ${newAgent.field_3_s}
-<b>Дата добавления:</b> ${newAgent.field_4_s}
-<b>Дата удаления:</b> ${newAgent.field_5_s ? newAgent.field_5_s : '-'}
-<b>Ссылки:</b> ${newAgent.field_6_s ? newAgent.field_6_s.split('; ').map(url => `<a href="${url}">${url}</a>`).join('\n') : '-'}
-<b>Кинопоиск:</b> ${newAgent.person === '-' || newAgent.person.length === 0 || !newAgent.person
-        ? 'Не найдено совпадений по дню рождения' : newAgent.person.map(el => `<a href="https://www.kinopoisk.ru/name/${el.id}">${el?.name || el?.enName}</a>`).join('\n')}`
+    return formatAgent(newAgent, index, agentsList?.length)
 }

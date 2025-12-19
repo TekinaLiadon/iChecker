@@ -1,11 +1,9 @@
 import {Query} from "./type";
 import {sql} from "bun";
-import wordsListExceptions from "../../04-shared/enums/wordsListExceptions";
 
 var nameCheck = (str: string): string => {
     const [firstName, lastName]= str.trim().split(/\s+/)
     if(!/^[А-ЯЁA-Z]/.test(firstName) || !/^[А-ЯЁA-Z]/.test(lastName)) return '-'
-    if(wordsListExceptions.includes(firstName.toLowerCase()) || wordsListExceptions.includes(lastName.toLowerCase())) return '-'
     const quotedTextMatch = str.match(/"([^"]+)"/)
     if(quotedTextMatch) {
         if(quotedTextMatch[1]) {
@@ -51,13 +49,16 @@ function areDatesEqual(date1, date2) {
     const normalizedDate1 = normalizeDate(date1);
     const normalizedDate2 = normalizeDate(date2);
 
-    if (normalizedDate1 === null || normalizedDate2 === null) {
-        return false;
+    if (normalizedDate1 === null) {
+        return true;
+    } else if(normalizedDate2 === null) {
+        return false
     }
 
     return normalizedDate1.getTime() === normalizedDate2.getTime();
 }
-export default async (query: string, birthday:string, id: number) => {
+export default async (query: string, birthday:string, type:string, id: number) => {
+    if(type !== "Физические лица") return '-'
     const name = nameCheck(query)
     if(name === '-') return name
     var data: Query = {

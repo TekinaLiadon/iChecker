@@ -10,6 +10,7 @@ export default (fullAgentsList) => {
     '${escapePG(item.field_4_s)}',
     '${escapePG(item.field_5_s)}',
     '${escapePG(item.field_6_s)}',
+    '${escapePG(item.field_7_s)}',
     '${escapePG(item.lastModified_l)}',
     '${escapePG(item.field_12_s)}'
   )`)
