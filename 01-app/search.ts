@@ -3,6 +3,7 @@ import createAgentMessage from "../04-shared/utils/createAgentMessage";
 import {Context} from "telegraf";
 import getKinopoiskInfo from "../03-entities/kinopoisk/getKinopoiskInfo";
 import {sql} from "bun";
+import path from "path";
 
 type Agent = {
     agent: Record<string, any>;
@@ -41,6 +42,6 @@ export default async (ctx: Context): Promise<void> => {
     }), {parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard},})
         : await ctx.reply('Ничего не найдено')
     if (result.img) await ctx.replyWithPhoto(
-        { source: `${Bun.fileURLToPath(new URL('../uploads/', import.meta.url))}${result.img}` },
+        { source: path.join(process.cwd(), 'uploads', result.img) },
     );
 }

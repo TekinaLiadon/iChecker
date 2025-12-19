@@ -1,6 +1,7 @@
 import sharp from 'sharp';
+import path from "path";
 
-export default async (ctx, name, path = '../../uploads/') => {
+export default async (ctx, name, pathh = '../../uploads/') => {
     const photo = ctx.message.photo[ctx.message.photo.length - 1];
     const id = photo.file_id
     const file = await ctx.telegram.getFile(id);
@@ -14,8 +15,7 @@ export default async (ctx, name, path = '../../uploads/') => {
         .toBuffer()
 
     const fileName = name ? `${name}.webp` : `${file.file_unique_id}.webp`;
-    const uploadsDir = Bun.fileURLToPath(new URL(path, import.meta.url));
-    const fullPath = `${uploadsDir}${fileName}`;
+    const fullPath = path.join(process.cwd(), 'uploads', fileName);
 
     await Bun.write(fullPath, webpBuffer)
     return fileName
