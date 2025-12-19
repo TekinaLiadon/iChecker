@@ -1,6 +1,7 @@
 import pino from "pino";
+import * as path from "path";
 
-const logPath = Bun.fileURLToPath(new URL('../../logs/app.log', import.meta.url));
+const logPath = path.join(process.cwd(), 'logs', 'app.log');
 const transport = pino.transport({
     target: 'pino/file',
     options: {destination: logPath}
