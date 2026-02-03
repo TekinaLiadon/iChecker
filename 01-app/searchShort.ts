@@ -46,15 +46,13 @@ export default async (ctx: Context): Promise<void> => {
         captionToSend = caption.substring(0, MAX_CAPTION_LENGTH) + "...";
     }
 
-    result?.img ? await ctx.replyWithPhoto(
+    await ctx.reply(createAgentMessage({
+        agent: result,
+        person: person,
+    }), {parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard},})
+    if (result?.img) await ctx.replyWithPhoto(
         {
             source: path.join(process.cwd(), 'uploads', result.img),
-        }, {caption: captionToSend, parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard}}
-    ) : result ? await ctx.reply(createAgentMessage({
-            agent: result,
-            person: person,
-        }), {parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard},})
-        : await ctx.reply('Ничего не найдено')
-
-
+        }
+    )
 }
