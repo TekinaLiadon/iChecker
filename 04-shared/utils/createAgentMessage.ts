@@ -1,3 +1,4 @@
+import agent from "../../03-entities/agent";
 
 var renameMap = {
     field_number: 'field_1_i',
@@ -32,6 +33,21 @@ const formatAgent = (agent, index, agentsListLength) => {
 <b>Кинопоиск:</b> ${kinopoisk}`;
 }
 
+const shortFormat = (agent) => {
+    const links = agent.field_6_s
+        ? agent.field_6_s.split('; ').map(url => `<a href="${url}">${url}</a>`).join('\n')
+        : '-';
+    const kinopoisk = !agent.person || agent.person === '-' || agent.person.length === 0
+        ? 'Не найдено совпадений по дню рождения'
+        : agent.person.map(el => `<a href="https://www.kinopoisk.ru/name/${el.id}">${el?.name || el?.enName}</a>`).join('\n');
+    return `
+<b>Найденная информация</b>
+<b>ФИО:</b> ${agent.field_2_s}
+<b>Ссылки:</b> ${links}
+<b>Описание:</b> ${agent?.description ? agent?.description : '-'}
+<b>Кинопоиск:</b> ${kinopoisk}`;
+}
+
 export default (options): string => {
     const {agent, index, agentsList, person} = options
     let newAgent
@@ -43,5 +59,7 @@ export default (options): string => {
     )
     } else newAgent = agent
     newAgent.person = person
-    return formatAgent(newAgent, index, agentsList?.length)
+    return options?.isShort
+        ? shortFormat(newAgent)
+        : formatAgent(newAgent, index, agentsList?.length)
 }

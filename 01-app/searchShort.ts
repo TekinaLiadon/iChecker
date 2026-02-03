@@ -17,7 +17,7 @@ const MAX_CAPTION_LENGTH = 1000;
 export default async (ctx: Context): Promise<void> => {
     const name: string = ctx.message.text.split(' ').slice(1).join(' ')
     if (!name) {
-        ctx.reply('Использование: /search Фамилия');
+        ctx.reply('Использование: /search_short Фамилия');
         return
     }
 
@@ -39,6 +39,7 @@ export default async (ctx: Context): Promise<void> => {
     const caption = createAgentMessage({
         agent: result,
         person: person,
+        isShort: true,
     });
     let captionToSend = caption;
     if (caption.length > MAX_CAPTION_LENGTH) {
@@ -56,12 +57,4 @@ export default async (ctx: Context): Promise<void> => {
         : await ctx.reply('Ничего не найдено')
 
 
-    /*result ? await ctx.reply(createAgentMessage({
-        agent: result,
-        person: person,
-    }), {parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard},})
-        : await ctx.reply('Ничего не найдено')
-    if (result.img) await ctx.replyWithPhoto(
-        { source: path.join(process.cwd(), 'uploads', result.img) },
-    );*/
 }

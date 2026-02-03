@@ -23,6 +23,8 @@ export default async (): Promise<void> => {
     domain_name TEXT,
     type_agent VARCHAR(256),
     kinopoisk_info jsonb,
+    kinopoisk_id INTEGER,
+    kinopoisk_full jsonb,
     birthday VARCHAR(64),
     last_modified BIGINT NOT NULL);`
     await sql`CREATE TABLE info (

@@ -1,13 +1,17 @@
-import {Context, session, Telegraf} from 'telegraf'
+import {Context, Telegraf} from 'telegraf'
 import startTask from "../04-shared/utils/startTask";
 import createDatabase from "../03-entities/agent/createDatabase";
 import checkTime from "../04-shared/utils/checkTime";
 import search from "./search";
+import searchShort from "./searchShort";
 import btn_agent from "./btn_agent";
 import sendMessage from "./sendMessage";
 import add from "./add";
 import help from "../02-commands/help";
 import logger from "../04-shared/utils/logger";
+import searchFilm from "./searchFilm";
+import addLink from "./addLink";
+import getTable from "../02-commands/getTable";
 
 const bot: Telegraf<Context> = new Telegraf(Bun.env.BOT_TOKEN)
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -23,6 +27,10 @@ const start = async (): Promise<void> => {
             ctx.reply('Бот работает');
         });
         bot.command('search', search);
+        bot.command('search_short', searchShort);
+        bot.command('search_films', searchFilm);
+        bot.command('add_link', addLink);
+        bot.command('table', getTable)
         bot.action(/^agent_/, btn_agent);
         await createDatabase()
         const task = async () => {
