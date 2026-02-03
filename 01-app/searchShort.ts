@@ -13,7 +13,6 @@ type Agent = {
     kinopoisk_info?: any;
 }
 
-const MAX_CAPTION_LENGTH = 1000;
 export default async (ctx: Context): Promise<void> => {
     const name: string = ctx.message.text.split(' ').slice(1).join(' ')
     if (!name) {
@@ -36,15 +35,6 @@ export default async (ctx: Context): Promise<void> => {
 
     let person = await getKinopoiskInfo(result)
 
-    const caption = createAgentMessage({
-        agent: result,
-        person: person,
-        isShort: true,
-    });
-    let captionToSend = caption;
-    if (caption.length > MAX_CAPTION_LENGTH) {
-        captionToSend = caption.substring(0, MAX_CAPTION_LENGTH) + "...";
-    }
 
     await ctx.reply(createAgentMessage({
         agent: result,
