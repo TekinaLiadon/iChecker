@@ -17,7 +17,9 @@ const formatAgent = (agent, index, agentsListLength) => {
         ? agent.field_6_s.split('; ').map(url => `<a href="${url}">${url}</a>`).join('\n')
         : '-';
 
-    const kinopoisk = !agent.person || agent.person === '-' || agent.person.length === 0
+    const kinopoisk = agent.kinopoisk_id
+        ? `<a href="https://www.kinopoisk.ru/name/${agent.kinopoisk_id}">${agent.field_2_s}</a>`
+        : !agent.person || agent.person === '-' || agent.person.length === 0
         ? 'Не найдено совпадений по дню рождения'
         : agent.person.map(el => `<a href="https://www.kinopoisk.ru/name/${el.id}">${el?.name || el?.enName}</a>`).join('\n');
     return `
@@ -37,7 +39,9 @@ const shortFormat = (agent) => {
     const links = agent.field_6_s
         ? agent.field_6_s.split('; ').map(url => `<a href="${url}">${url}</a>`).join('\n')
         : '-';
-    const kinopoisk = !agent.person || agent.person === '-' || agent.person.length === 0
+    const kinopoisk = agent.kinopoisk_id
+        ? `<a href="https://www.kinopoisk.ru/name/${agent.kinopoisk_id}">${agent.field_2_s}</a>`
+        : !agent.person || agent.person === '-' || agent.person.length === 0
         ? 'Не найдено совпадений по дню рождения'
         : agent.person.map(el => `<a href="https://www.kinopoisk.ru/name/${el.id}">${el?.name || el?.enName}</a>`).join('\n');
     return `

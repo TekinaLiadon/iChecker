@@ -35,10 +35,10 @@ export default async (ctx: Context): Promise<void> => {
 
     let person = await getKinopoiskInfo(result)
 
-
     await ctx.reply(createAgentMessage({
         agent: result,
         person: person,
+        isShort: true,
     }), {parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard},})
     if (result?.img) await ctx.replyWithPhoto(
         {

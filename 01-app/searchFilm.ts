@@ -14,6 +14,16 @@ type Agent = {
     id?: string;
     kinopoisk_info?: any;
 }
+
+var roleTransliteration = (role) => {
+    return {
+        'director': 'Режиссер',
+        'actor': 'Актер',
+        'writer': 'Сценарист',
+        'cameo': 'Камео',
+        'design': 'Дизайн'
+    }[role] || role
+}
 export default async (ctx: Context): Promise<void> => {
     const name: string = ctx.message.text.split(' ').slice(1).join(' ')
     if (!name) {
@@ -53,8 +63,8 @@ export default async (ctx: Context): Promise<void> => {
         /*.filter((obj, idx, arr) =>
             idx === arr.findIndex((t) => t.id === obj.id))*/
         .reduce((acc, el) => {
-            return acc + `Фильм: <a href="https://www.kinopoisk.ru/film/${el.id}">${el.name}</a>
-Роль: ${el.enProfession}\n`
+            return acc + `Фильм: <a href="https://www.kinopoisk.ru/film/${el.id}">${el?.name || 'Неизвестно'}</a>
+Роль: ${roleTransliteration(el.enProfession)}\n`
         }, '') // TODO лимит
 
     result ? await ctx.reply(movies, {parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard},})
