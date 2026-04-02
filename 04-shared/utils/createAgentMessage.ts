@@ -1,4 +1,3 @@
-import agent from "../../03-entities/agent";
 
 var renameMap = {
     field_number: 'field_1_i',
