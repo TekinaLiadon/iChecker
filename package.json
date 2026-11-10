@@ -2,19 +2,31 @@
   "name": "iChecker",
   "version": "1.0.0",
   "scripts": {
-    "dev": "bun run --watch 01-app/index.ts",
-    "build_server": "bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile server \\\n\t./01-app/index.ts",
+    "dev": "bun run scripts/patch-sharp.ts && bun run --watch 01-app/index.ts",
+    "build_server": "bun run scripts/patch-sharp.ts && bun build \\\n\t--compile \\\n\t--minify-whitespace \\\n\t--minify-syntax \\\n\t--target bun \\\n\t--outfile server \\\n\t./01-app/index.ts",
     "start": "./server",
-    "test": "bun test"
+    "migrate": "bunx bunsql-native-migrate up",
+    "migrate:status": "bunx bunsql-native-migrate status",
+    "migrate:mark": "bunx bunsql-native-migrate mark --all",
+    "backup": "bun run scripts/backup.ts",
+    "restore": "bun run scripts/restore.ts",
+    "pack": "bun run scripts/pack.ts",
+    "unpack": "bun run scripts/unpack.ts",
+    "test": "bun run scripts/patch-sharp.ts && bun test"
   },
   "dependencies": {
-    "pino": "^10.1.0",
-    "sharp": "^0.34.5",
+    "bunsql-native-migrate": "0.6.2",
+    "pino": "10.3.1",
+    "sharp": "0.35.4",
     "telegraf": "^4.16.3",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "zod": "4.6.4"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "1.4.2"
+  },
+  "imports": {
+    "#libvips": "./native-stage/libvips-cpp.so.8.18.6"
   },
   "module": true
 }
