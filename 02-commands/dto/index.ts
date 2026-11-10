@@ -11,4 +11,7 @@ export interface IBot {
         addPhoto(ctx: any): Promise<void>;
         createTable(ctx: any): Promise<void>;
         nextAgent(ctx: any): Promise<void>;
+        getDescriptionKeyboard(fieldNumber: number): { text: string; callback_data: string }[][];
+        startEditDescription(ctx: any): Promise<void>;
+        saveDescription(ctx: any): Promise<void>;
 }

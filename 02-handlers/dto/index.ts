@@ -1,10 +1,13 @@
 export interface IAgentDb {
-    createDatabase(): Promise<void>;
+    hasLegacySchema(): Promise<boolean>;
+    isEmpty(): Promise<boolean>;
+    insertAgents(fullAgentsList: AgentInfo[]): Promise<void>;
     updateAgents(fullAgentsList: AgentInfo[]): Promise<AgentInfo[]>
-    getAgentFull(name: string, number: number): Promise<Agent>;
+    getAgentFull(name: string, number: number | string): Promise<Agent>;
+    getAgentByFieldNumber(field_number: number): Promise<Agent | null>;
     editDescription(id: number, description: string): Promise<void>;
     editSrcImg(id: number, fileName: string): Promise<void>;
-    editLink(id: number, field_number: number): Promise<string>;
+    editLink(id: number, field_number: number | string): Promise<string>;
     getTableAgents(): Promise<any>; // TODO
     updateKinopoiskInfo(id: number, json: any): Promise<void> // TODO
 }
@@ -31,11 +34,11 @@ export type Agent = {
 export type AgentInfo = {
     field_1_i: number;
     field_2_s: string;
-    field_3_s: string;
+    field_3_s?: string;
     field_4_dt?: string;
-    field_4_s: string;
-    field_5_s: string;
-    field_6_s: string;
+    field_4_s?: string;
+    field_5_s?: string;
+    field_6_s?: string;
     field_7_s?: string;
     field_8_s?: string;
     field_9_s?: string;
@@ -54,14 +57,14 @@ export type AgentInfo = {
     field_21_s?: string;
     grid_s?: string;
     id?: string;
-    lastModified_l: number;
+    lastModified_l?: number;
     _version_?: number;
 }
 
 export interface IMoviesAgent {
     getPersonInfo(id: number, personId: number): Promise<any>;
     getMoviesAgent(info: Agent): Promise<any>;
-    getPersonList(query: string, birthday:string, type:string, id: number): Promise<any>;
+    getPersonList(query: string, birthday: string | undefined, type: string | undefined, id: number | null): Promise<any>;
     getPersonIdInfo(info: Agent): Promise<any>; // TODO
 }
 
@@ -72,7 +75,7 @@ export type Query = {
 }
 
 export interface IAgentInfo {
-    getAgent(offset: number): Promise<AgentInfo[]>;
+    getAgent(offset: number): Promise<{size: number; values: AgentInfo[]}>;
     getAgentsList(): Promise<AgentInfo[]>;
 }
 
@@ -85,37 +88,6 @@ export type Body = {
         property: string,
         direction: "asc" | "desc"
     }>
-}
-
-
-export type AgentInfo = {
-    field_1_i: number;
-    field_2_s: string;
-    field_3_s: string;
-    field_4_dt?: string;
-    field_4_s: string;
-    field_5_s: string;
-    field_6_s: string;
-    field_7_s?: string;
-    field_8_s?: string;
-    field_9_s?: string;
-    field_10_s?: string;
-    field_11_s?: string;
-    field_12_s?: string;
-    field_13_s?: string;
-    field_14_s?: string;
-    field_15_dt?: string;
-    field_15_s?: string;
-    field_16_s?: string;
-    field_17_s?: string;
-    field_18_s?: string;
-    field_19_s?: string;
-    field_20_s?: string;
-    field_21_s?: string;
-    grid_s?: string;
-    id?: string;
-    lastModified_l: number;
-    _version_?: number;
 }
 
 type FacetCount = {

@@ -1,29 +1,54 @@
 import {Context, Telegraf} from "telegraf";
+import {markMigrationsApplied, migrateUp} from "bunsql-native-migrate";
 import {IBot} from "../02-commands/dto";
 import {TelegramBot} from "../02-commands/telegram";
 import {IAgentDb, IAgentInfo, AgentInfo, IMoviesAgent} from "../02-handlers/dto";
 import {AgentKinopoisk, AgentMinjust, AgentPostgres} from "../02-handlers";
 import createAgentMessage from "../04-shared/utils/createAgentMessage";
+import {SourceHealthTracker} from "../04-shared/utils/sourceHealth";
 import {FabricLogger, ILogger} from "../04-shared/utils/logger";
+import env from "../04-shared/utils/config";
 
 export default class AgentsManager {
-    bot: Telegraf<Context> = new Telegraf(Bun.env.BOT_TOKEN)
+    bot: Telegraf<Context> = new Telegraf(env.BOT_TOKEN)
     logger: ILogger = FabricLogger.createLogger()
     commands: IBot = new TelegramBot()
     db: IAgentDb = new AgentPostgres()
     agents: IAgentInfo = new AgentMinjust()
     movies: IMoviesAgent = new AgentKinopoisk()
-    workInterval
+    health = {
+        minjust: new SourceHealthTracker({name: "Минюст", notify: (text) => this.alert(text)}),
+        kinopoisk: new SourceHealthTracker({name: "Кинопоиск", notify: (text) => this.alert(text)}),
+    }
+    migrations = {
+        up: migrateUp,
+        mark: markMigrationsApplied,
+    }
+    workInterval: NodeJS.Timeout | null = null
 
     async startService(): Promise<void> {
         process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
         this.logger.info("Бот запущен");
 
-        await this.db.createDatabase()
+        await this.prepareDatabase()
 
         this.settingBot()
         await this.createTask()
         await this.bot.launch();
+    }
+
+    async prepareDatabase(): Promise<void> {
+        const databaseUrl = env.POSTGRES_URL
+        if (await this.db.hasLegacySchema()) {
+            await this.migrations.mark({databaseUrl})
+            this.logger.info("Найдена схема без истории миграций — применён baseline без выполнения миграций")
+            return
+        }
+        const {applied} = await this.migrations.up({databaseUrl})
+        if (applied.length > 0) this.logger.info(`Применены миграции: ${applied.join(", ")}`)
+        if (await this.db.isEmpty()) {
+            await this.db.insertAgents(await this.agents.getAgentsList())
+        }
     }
 
     settingBot() {
@@ -40,6 +65,8 @@ export default class AgentsManager {
         this.bot.on('photo', this.commands.addPhoto.bind(this.commands))
         this.bot.command('table', this.commands.createTable.bind(this.commands));
         this.bot.action(/^agent_/, this.commands.nextAgent.bind(this.commands));
+        this.bot.action(/^editdesc_/, this.commands.startEditDescription.bind(this.commands));
+        this.bot.on('text', this.commands.saveDescription.bind(this.commands));
     }
 
     async createTask() {
@@ -112,13 +139,40 @@ export default class AgentsManager {
         }, delay);
     }
 
+    async alert(text: string): Promise<void> {
+        try {
+            await this.bot.telegram.sendMessage(env.BOT_CHAT, text)
+        } catch (e) {
+            this.logger.error(e)
+        }
+    }
+
     async sendMessage() {
-        const fullAgentsList: AgentInfo[] = await this.agents.getAgentsList()
+        let fullAgentsList: AgentInfo[]
+        try {
+            fullAgentsList = await this.agents.getAgentsList()
+        } catch (e) {
+            this.logger.error(e)
+            await this.health.minjust.failure()
+            return
+        }
+        await this.health.minjust.success()
+
         const agentsList: AgentInfo[] = await this.db.updateAgents(fullAgentsList)
         if (agentsList.length === 0) return
 
+        let kinopoiskFailures = 0
+        let kinopoiskChecks = 0
         const messageList: string[] = await Promise.all(agentsList.map(async (agent: AgentInfo, index: number): Promise<string> => {
-            const person = await this.movies.getPersonList(agent.field_2_s, agent.field_12_s, agent.field_7_s, null)
+            let person
+            try {
+                person = await this.movies.getPersonList(agent.field_2_s, agent.field_12_s, agent.field_7_s, null)
+            } catch (e) {
+                this.logger.error(e)
+                person = '-'
+                kinopoiskFailures += 1
+            }
+            if (person !== '-') kinopoiskChecks += 1
             return createAgentMessage({
                 agent,
                 index,
@@ -126,9 +180,14 @@ export default class AgentsManager {
                 person,
             })
         }))
+        if (kinopoiskFailures > 0) await this.health.kinopoisk.failure()
+        else if (kinopoiskChecks > 0) await this.health.kinopoisk.success()
 
         messageList.forEach((el: string, index: number): void => {
-            setTimeout(() => this.bot.telegram.sendMessage(Bun.env.BOT_CHAT, el, {parse_mode: 'HTML'}), 1000 * index)
+            setTimeout(() => this.bot.telegram.sendMessage(env.BOT_CHAT, el, {
+                parse_mode: 'HTML',
+                reply_markup: {inline_keyboard: this.commands.getDescriptionKeyboard(agentsList[index].field_1_i)},
+            }), 1000 * index)
         })
     }
 

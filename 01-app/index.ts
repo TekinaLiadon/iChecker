@@ -17,12 +17,14 @@ const manager = new AgentsManager();
     await processingError(manager.startService.bind(manager))
 })()
 
-process.once('SIGINT', () => {
+const signals = process as NodeJS.EventEmitter
+
+signals.once('SIGINT', () => {
     manager.stop('SIGINT')
     logger.info('Пользователь завершил работу бота');
     process.exit(0)
 })
-process.once('SIGTERM', () => {
+signals.once('SIGTERM', () => {
     manager.stop('SIGTERM')
     logger.info('Система завершила работу бота');
     process.exit(0)
