@@ -15,12 +15,12 @@ export class TelegramBot implements IBot {
     movie: IMoviesAgent = new AgentKinopoisk()
     editDescriptionRequests: Map<number, { id: number; name: string }> = new Map()
 
-    async start(ctx: Context): Promise<void> {
+    start(ctx: Context): void {
         ctx.reply('Заглушка')
     }
 
-    async help(ctx: Context): Promise<void> {
-        ctx.reply(`Есть команды: 
+    help(ctx: Context): void {
+        ctx.reply(`Есть команды:
 /help, 
 /online - проверяет доступен ли бот, 
 /search (agents) - поиск по фамилии агента, 
@@ -32,7 +32,7 @@ export class TelegramBot implements IBot {
 /table - отдает таблицу всех агентов`)
     }
 
-    async online(ctx: Context): Promise<void> {
+    online(ctx: Context): void {
         ctx.reply('Бот работает');
     }
 
@@ -46,7 +46,7 @@ export class TelegramBot implements IBot {
     getKeyboard(agentNumber: number | undefined, name: string): { text: string; callback_data: string }[][] | undefined {
         if (agentNumber === undefined || agentNumber <= 1) return undefined;
 
-        return new Array(agentNumber > 4 ? 3 : agentNumber - 1).fill(null).map((el, index) => {
+        return Array.from({length: agentNumber > 4 ? 3 : agentNumber - 1}, (el, index) => {
             return [{text: `Вариант ${index + 2}`, callback_data: `agent_${index + 1}_${name}`}]
         })
     }
@@ -108,12 +108,10 @@ export class TelegramBot implements IBot {
 
             const person = await this.movie.getPersonIdInfo(agent)
             const movies = person.movies
-                /*.filter((obj, idx, arr) =>
-                    idx === arr.findIndex((t) => t.id === obj.id))*/
                 .reduce((acc: string, el: any) => {
                     return acc + `Фильм: <a href="https://www.kinopoisk.ru/film/${el.id}">${el?.name || 'Неизвестно'}</a>
 Роль: ${this.roleTransliteration(el.enProfession)}\n`
-                }, '') // TODO лимит
+                }, '')
 
             await ctx.reply(movies, {parse_mode: 'HTML', reply_markup: {inline_keyboard: keyboard ?? []},})
         } catch (e: any) {
@@ -123,13 +121,13 @@ export class TelegramBot implements IBot {
 
     async addLink(ctx: Context): Promise<void> {
         if (!ctx.message || !('text' in ctx.message)) return
-        const [field_number, link, ...rest] = ctx.message.text.split(' ').slice(1)
+        const [field_number, link] = ctx.message.text.split(' ').slice(1)
         if (!field_number || !link) {
             ctx.reply('Использование: /add_link Номер ссылка');
             return
         }
 
-        const regex = /^https:\/\/www\.kinopoisk\.ru\/name\/(\d+)\/$/;
+        const regex = /^https:\/\/www\.kinopoisk\.ru\/name\/(\d+)\/$/u;
         if (!regex.test(link)) {
             ctx.reply('Некоректная ссылка');
             return
@@ -174,13 +172,13 @@ export class TelegramBot implements IBot {
 
     async addPhoto(ctx: Context): Promise<void> {
         try {
-            const isChat: boolean = ctx.message?.chat.id == env.BOT_CHAT
+            const isChat: boolean = ctx.message?.chat.id === env.BOT_CHAT
             if (!isChat) throw new Error('Нет доступа')
 
             if (!ctx.message || !('caption' in ctx.message)) return
             const textList: string[] = ctx.message.caption?.split(' ') ?? []
             const name = textList.slice(1).join(' ')
-            if (textList[0] != '/edit_photo') return
+            if (textList[0] !== '/edit_photo') return
             if (!name) throw new Error('Нужно выбрать имя агента')
 
             const agent: Agent = await this.db.getAgentFull(name, 0)
@@ -258,7 +256,7 @@ export class TelegramBot implements IBot {
         try {
             const callbackData: string = ctx.callbackQuery.data || '';
             const [number, name] = callbackData.split('_').splice(1)
-            const agent: Agent = await this.db.getAgentFull(name, number)
+            const agent: Agent = await this.db.getAgentFull(name ?? '', number ?? 0)
             const person = await this.movie.getMoviesAgent(agent)
 
             await this.replyAgentCard(
@@ -281,7 +279,7 @@ export class TelegramBot implements IBot {
     async startEditDescription(ctx: any): Promise<void> {
         try {
             const chatId = ctx.callbackQuery?.message?.chat?.id
-            if (chatId != env.BOT_CHAT) {
+            if (chatId !== env.BOT_CHAT) {
                 ctx.answerCbQuery()
                 return
             }
@@ -309,7 +307,7 @@ export class TelegramBot implements IBot {
         if (!promptId) return
         const request = this.editDescriptionRequests.get(promptId)
         if (!request) return
-        if (ctx.message.chat.id != env.BOT_CHAT) return
+        if (ctx.message.chat.id !== env.BOT_CHAT) return
 
         this.editDescriptionRequests.delete(promptId)
         try {

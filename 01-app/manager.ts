@@ -64,13 +64,13 @@ export default class AgentsManager {
         this.bot.command('edit_description', this.commands.editDescription.bind(this.commands))
         this.bot.on('photo', this.commands.addPhoto.bind(this.commands))
         this.bot.command('table', this.commands.createTable.bind(this.commands));
-        this.bot.action(/^agent_/, this.commands.nextAgent.bind(this.commands));
-        this.bot.action(/^editdesc_/, this.commands.startEditDescription.bind(this.commands));
+        this.bot.action(/^agent_/u, this.commands.nextAgent.bind(this.commands));
+        this.bot.action(/^editdesc_/u, this.commands.startEditDescription.bind(this.commands));
         this.bot.on('text', this.commands.saveDescription.bind(this.commands));
     }
 
     async createTask() {
-        await this.sendMessage() // Start check
+        await this.sendMessage()
         const task = async () => {
             if (!this.checkTime()) return
             await this.sendMessage()
@@ -184,9 +184,11 @@ export default class AgentsManager {
         else if (kinopoiskChecks > 0) await this.health.kinopoisk.success()
 
         messageList.forEach((el: string, index: number): void => {
+            const agent = agentsList[index]
+            if (!agent) return
             setTimeout(() => this.bot.telegram.sendMessage(env.BOT_CHAT, el, {
                 parse_mode: 'HTML',
-                reply_markup: {inline_keyboard: this.commands.getDescriptionKeyboard(agentsList[index].field_1_i)},
+                reply_markup: {inline_keyboard: this.commands.getDescriptionKeyboard(agent.field_1_i)},
             }), 1000 * index)
         })
     }

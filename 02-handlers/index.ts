@@ -9,7 +9,7 @@ const KINOPOISK_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 export class AgentPostgres implements IAgentDb {
     async hasLegacySchema(): Promise<boolean> {
-        const [data] = await sql`SELECT
+        const [data] = await sql<{agents_exists: boolean; info_exists: boolean; migrations_exists: boolean}[]>`SELECT
                         EXISTS (
                             SELECT 1
                             FROM information_schema.tables
@@ -28,12 +28,13 @@ export class AgentPostgres implements IAgentDb {
                             WHERE table_schema = 'public'
                             AND table_name = 'migrations'
                         ) AS migrations_exists;`
+        if (!data) return false
         return data.agents_exists && data.info_exists && !data.migrations_exists
     }
 
     async isEmpty(): Promise<boolean> {
-        const [{count}] = await sql<{count: number}[]>`SELECT COUNT(*)::int AS count FROM agents;`
-        return count === 0
+        const [row] = await sql<{count: number}[]>`SELECT COUNT(*)::int AS count FROM agents;`
+        return row?.count === 0
     }
 
     async insertAgents(fullAgentsList: AgentInfo[]): Promise<void> {
@@ -46,7 +47,7 @@ export class AgentPostgres implements IAgentDb {
         const mismatchedFieldNumbers = new Set();
         const updateFieldNumbers = new Set();
         for (let obj of fullAgentsList) {
-            if (!obj.field_1_i) continue // TODO
+            if (!obj.field_1_i) continue
             const result = await sql.unsafe(`
         SELECT field_number, exclusion_date
         FROM agents
@@ -67,7 +68,8 @@ export class AgentPostgres implements IAgentDb {
             await sql.unsafe(`INSERT INTO agents (${fields.join(', ')}) VALUES ${values};`);
         }
 
-        if (resultUpdate.length > 0) await sql`UPDATE agents SET exclusion_date =${resultUpdate[0].field_5_s} WHERE field_number IN ${sql([...updateFieldNumbers])}`
+        const firstUpdate = resultUpdate[0]
+        if (firstUpdate) await sql`UPDATE agents SET exclusion_date =${firstUpdate.field_5_s} WHERE field_number IN ${sql([...updateFieldNumbers])}`
 
         return [...resultNew, ...resultUpdate]
     }
@@ -157,7 +159,7 @@ export class AgentMinjust implements IAgentInfo {
         "field_5_s",
         "field_6_s",
         "field_7_s",
-        "field_12_s", // 16.08.1982
+        "field_12_s",
         "lastModified_l"
     ]
 
@@ -302,19 +304,18 @@ export class AgentKinopoisk implements IMoviesAgent {
     }
 
     nameCheck(str: string): string {
-        const [firstName, lastName] = str.trim().split(/\s+/)
-        if (!/^[А-ЯЁA-Z]/.test(firstName) || !/^[А-ЯЁA-Z]/.test(lastName)) return '-'
-        const quotedTextMatch = str.match(/"([^"]+)"/)
-        if (quotedTextMatch) {
-            if (quotedTextMatch[1]) {
-                const words = quotedTextMatch[1]?.match(/\b\w+\b/g);
-                if (words) {
-                    const wordsWithoutBrackets = words.filter(word => {
-                        const regex = new RegExp(`\\(${word}\\)|\\(${word}|${word}\\)`);
-                        return !regex.test(quotedTextMatch[1]);
-                    });
-                    return wordsWithoutBrackets.join('')
-                }
+        const [firstName, lastName] = str.trim().split(/\s+/u)
+        if (!firstName || !lastName) return '-'
+        if (!/^[А-ЯЁA-Z]/u.test(firstName) || !/^[А-ЯЁA-Z]/u.test(lastName)) return '-'
+        const quotedText = str.match(/"([^"]+)"/u)?.[1]
+        if (quotedText) {
+            const words = quotedText.match(/\b\w+\b/gu);
+            if (words) {
+                const wordsWithoutBrackets = words.filter(word => {
+                    const regex = new RegExp(`\\(${word}\\)|\\(${word}|${word}\\)`, "u");
+                    return !regex.test(quotedText);
+                });
+                return wordsWithoutBrackets.join('')
             }
         }
         return `${lastName} ${firstName}`

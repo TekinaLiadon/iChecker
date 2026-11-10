@@ -8,8 +8,8 @@ export interface IAgentDb {
     editDescription(id: number, description: string): Promise<void>;
     editSrcImg(id: number, fileName: string): Promise<void>;
     editLink(id: number, field_number: number | string): Promise<string>;
-    getTableAgents(): Promise<any>; // TODO
-    updateKinopoiskInfo(id: number, json: any): Promise<void> // TODO
+    getTableAgents(): Promise<any>;
+    updateKinopoiskInfo(id: number, json: any): Promise<void>
 }
 
 export type Agent = {
@@ -65,7 +65,7 @@ export interface IMoviesAgent {
     getPersonInfo(id: number, personId: number): Promise<any>;
     getMoviesAgent(info: Agent): Promise<any>;
     getPersonList(query: string, birthday: string | undefined, type: string | undefined, id: number | null): Promise<any>;
-    getPersonIdInfo(info: Agent): Promise<any>; // TODO
+    getPersonIdInfo(info: Agent): Promise<any>;
 }
 
 export type Query = {
@@ -89,13 +89,3 @@ export type Body = {
         direction: "asc" | "desc"
     }>
 }
-
-type FacetCount = {
-    count: number;
-    name: string | null;
-};
-
-type Facet = {
-    name: string;
-    counts: FacetCount[];
-};

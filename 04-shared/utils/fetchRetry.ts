@@ -14,7 +14,9 @@ export const getRetryDelayMs = (attempt: number, baseDelayMs: number = RETRY_BAS
     return backoff / 2 + Math.random() * (backoff / 2);
 };
 
-const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise<void>((resolve) => {
+    setTimeout(resolve, ms)
+});
 
 export default async function fetchRetry(url: string, init?: RequestInit, options?: RetryOptions): Promise<Response> {
     const maxAttempts = Math.max(1, options?.maxAttempts ?? RETRY_MAX_ATTEMPTS);

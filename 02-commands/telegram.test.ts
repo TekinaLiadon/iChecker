@@ -1,4 +1,4 @@
-import {test, expect, describe, mock, beforeEach, afterEach} from "bun:test";
+import {test, expect, describe, mock, afterEach} from "bun:test";
 import {TelegramBot} from "./telegram";
 import type {Context} from "telegraf";
 import env from "../04-shared/utils/config";
@@ -95,16 +95,16 @@ describe("TelegramBot — getKeyboard", () => {
         const keyboard = bot.getKeyboard(10, "Иванов");
 
         expect(keyboard).toHaveLength(3);
-        expect(keyboard![0][0].text).toBe("Вариант 2");
-        expect(keyboard![2][0].text).toBe("Вариант 4");
-        expect(keyboard![2][0].callback_data).toBe("agent_3_Иванов");
+        expect(keyboard![0]?.[0]?.text).toBe("Вариант 2");
+        expect(keyboard![2]?.[0]?.text).toBe("Вариант 4");
+        expect(keyboard![2]?.[0]?.callback_data).toBe("agent_3_Иванов");
     });
 
     test("callback_data содержит имя", () => {
         const keyboard = bot.getKeyboard(3, "Иванов");
 
-        expect(keyboard![0][0].callback_data).toBe("agent_1_Иванов");
-        expect(keyboard![1][0].callback_data).toBe("agent_2_Иванов");
+        expect(keyboard![0]?.[0]?.callback_data).toBe("agent_1_Иванов");
+        expect(keyboard![1]?.[0]?.callback_data).toBe("agent_2_Иванов");
     });
 });
 
@@ -194,7 +194,7 @@ describe("TelegramBot — getDescriptionKeyboard", () => {
     test("callback_data не длиннее 64 байт", () => {
         const keyboard = bot.getDescriptionKeyboard(9999999999);
 
-        expect(Buffer.byteLength(keyboard[0][0].callback_data)).toBeLessThanOrEqual(64);
+        expect(Buffer.byteLength(keyboard[0]?.[0]?.callback_data as string)).toBeLessThanOrEqual(64);
     });
 });
 

@@ -78,8 +78,8 @@ describe.skipIf(!connected)("миграции — чистая база", () => 
         const status = await migrateStatus({databaseUrl: TEST_POSTGRES_URL, listDir: MIGRATIONS_DIR});
 
         expect(status.applied).toHaveLength(1);
-        expect(status.applied[0].name).toContain("baseline_agents_info");
-        expect(status.applied[0].checksum).toMatch(/^[0-9a-f]{64}$/);
+        expect(status.applied[0]?.name).toContain("baseline_agents_info");
+        expect(status.applied[0]?.checksum).toMatch(/^[0-9a-f]{64}$/u);
         expect(status.pending).toEqual([]);
     });
 
@@ -192,7 +192,7 @@ describe.skipIf(!connected)("миграции — baseline существующ�
             SELECT migration, checksum FROM migrations ORDER BY migration;`;
 
         expect(record.migration).toContain("baseline_agents_info");
-        expect(record.checksum).toMatch(/^[0-9a-f]{64}$/);
+        expect(record.checksum).toMatch(/^[0-9a-f]{64}$/u);
 
         const [agents] = await sql`SELECT to_regclass('public.agents') AS name`;
         expect(agents.name).toBe("agents");
@@ -236,8 +236,8 @@ describe.skipIf(!connected)("AgentPostgres — интеграция с БД", ()
 
         await db.insertAgents([makeAgentInfo({field_1_i: 1}), makeAgentInfo({field_1_i: 2})]);
 
-        const [{count}] = await sql<{ count: number }[]>`SELECT COUNT(*)::int AS count FROM agents`;
-        expect(count).toBe(2);
+        const [row] = await sql<{ count: number }[]>`SELECT COUNT(*)::int AS count FROM agents`;
+        expect(row?.count).toBe(2);
         expect(await db.isEmpty()).toBe(false);
     });
 
@@ -245,8 +245,8 @@ describe.skipIf(!connected)("AgentPostgres — интеграция с БД", ()
 
         await db.insertAgents([]);
 
-        const [{count}] = await sql<{ count: number }[]>`SELECT COUNT(*)::int AS count FROM agents`;
-        expect(count).toBe(2);
+        const [row] = await sql<{ count: number }[]>`SELECT COUNT(*)::int AS count FROM agents`;
+        expect(row?.count).toBe(2);
     });
 
     test("hasLegacySchema: мигрированная база не легаси", async () => {
@@ -261,8 +261,8 @@ describe.skipIf(!connected)("AgentPostgres — интеграция с БД", ()
         const result = await db.updateAgents([makeAgentInfo({field_1_i: 1}), makeAgentInfo({field_1_i: 2})]);
 
         expect(result).toHaveLength(2);
-        const [{count}] = await sql<{ count: number }[]>`SELECT COUNT(*)::int AS count FROM agents`;
-        expect(count).toBe(2);
+        const [row] = await sql<{ count: number }[]>`SELECT COUNT(*)::int AS count FROM agents`;
+        expect(row?.count).toBe(2);
     });
 
     test("updateAgents: ничего не возвращает при отсутствии изменений", async () => {
@@ -302,7 +302,7 @@ describe.skipIf(!connected)("AgentPostgres — интеграция с БД", ()
 
     test("getAgentFull: выбрасывает ошибку при отсутствии агента", async () => {
 
-        expect(db.getAgentFull("НесуществующаяФамилия", 0)).rejects.toThrow("Ничего не найдено");
+        await expect(db.getAgentFull("НесуществующаяФамилия", 0)).rejects.toThrow("Ничего не найдено");
     });
 
     test("getAgentFull: offset перебирает совпадения", async () => {

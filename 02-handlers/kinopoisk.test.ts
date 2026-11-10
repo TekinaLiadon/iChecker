@@ -247,7 +247,7 @@ describe("AgentKinopoisk — getPersonList", () => {
         const result = await kinopoisk.getPersonList("Иванов Иван", "01.01.1980", "Физические лица", null);
 
         expect(result).toHaveLength(1);
-        expect((result as Array<{ name: string }>)[0].name).toBe("Совпадение");
+        expect((result as Array<{ name: string }>)[0]?.name).toBe("Совпадение");
     });
 
     test("возвращает пустой массив если нет совпадений", async () => {
@@ -268,7 +268,7 @@ describe("AgentKinopoisk — getPersonList", () => {
         await kinopoisk.getPersonList("Иванов Иван", "01.01.1980", "Физические лица", 77);
 
         expect(updateKinopoiskInfo).toHaveBeenCalledTimes(1);
-        const [id, saved] = updateKinopoiskInfo.mock.calls[0];
+        const [id, saved] = updateKinopoiskInfo.mock.calls[0] ?? [];
         expect(id).toBe(77);
         expect(saved[0].timestamp).toBeDefined();
     });
@@ -290,7 +290,7 @@ describe("AgentKinopoisk — getPersonList", () => {
 
         await kinopoisk.getPersonList("Иванов Иван", "01.01.1980", "Физические лица", null);
 
-        const url = (global.fetch as unknown as ReturnType<typeof mock>).mock.calls[0][0] as string;
+        const url = (global.fetch as unknown as ReturnType<typeof mock>).mock.calls[0]?.[0] as string;
         expect(url).toContain("api.kinopoisk.dev/v1.4/person/search");
         expect(url).toContain("query=");
     });
@@ -408,7 +408,7 @@ describe("AgentKinopoisk — getPersonInfo", () => {
 
         await kinopoisk.getPersonInfo(42, 0);
 
-        const url = (global.fetch as unknown as ReturnType<typeof mock>).mock.calls[0][0] as string;
+        const url = (global.fetch as unknown as ReturnType<typeof mock>).mock.calls[0]?.[0] as string;
         expect(url).toBe("https://api.kinopoisk.dev/v1.4/person/42");
     });
 });

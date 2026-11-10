@@ -29,7 +29,7 @@ describe("packCards/unpackCards", () => {
         const archive = await packCards(source, outDir);
 
         expect(existsSync(archive)).toBe(true);
-        expect(path.basename(archive)).toMatch(/^ichecker-cards-\d{8}-\d{6}\.tar\.gz$/);
+        expect(path.basename(archive)).toMatch(/^ichecker-cards-\d{8}-\d{6}\.tar\.gz$/u);
 
         await unpackCards(archive, target);
 

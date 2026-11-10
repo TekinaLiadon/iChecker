@@ -43,9 +43,9 @@ describe("createAgentMessage — строгий стиль", () => {
 
         const message = createAgentMessage({agent, person: []});
 
-        expect(message.split("\n")[1]).toMatch(/^─+$/);
-        expect(message).not.toMatch(/^\s/);
-        expect(message).not.toMatch(/\n\s+\S/);
+        expect(message.split("\n")[1]).toMatch(/^─+$/u);
+        expect(message).not.toMatch(/^\s/u);
+        expect(message).not.toMatch(/\n\s+\S/u);
     });
 
     test("в рассылке новый агент — «Найденная информация», изменение — «Изменение списка»", () => {

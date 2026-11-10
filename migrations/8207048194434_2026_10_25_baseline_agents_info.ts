@@ -1,4 +1,4 @@
-import { sql, type SQL } from "bun";
+import type { SQL } from "bun";
 
 const up = async (tx: SQL) => {
     await tx`CREATE TABLE agents (

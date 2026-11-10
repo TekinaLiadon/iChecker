@@ -23,7 +23,7 @@ const runWithImmediateTimers = (capture?: number[]) => {
 const mockFetchSequence = (steps: (() => Promise<unknown>)[]) => {
     let call = 0;
     global.fetch = mock(() => {
-        const step = steps[Math.min(call, steps.length - 1)];
+        const step = steps[Math.min(call, steps.length - 1)]!;
         call += 1;
         return step();
     }) as unknown as typeof global.fetch;

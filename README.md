@@ -15,16 +15,19 @@ Telegram-бот, который следит за реестром Минюст�
 
 - `BOT_TOKEN` — токен бота;
 - `BOT_CHAT` — числовой id чата рассылки, бот должен состоять в этом чате;
-- `POSTGRES_URL` — подключение к БД;
-- `DATABASE_URL` — дубль `POSTGRES_URL`, нужен CLI миграций и `pg_dump`/`pg_restore`;
+- `POSTGRES_URL` — подключение к БД; этот же ключ используют CLI миграций, `bun run backup`/`restore` и сам бот;
 - `KINOPOISK_TOKEN` — ключ api.kinopoisk.dev;
 - `IS_DEV` — лог в консоль вместо `logs/app.log` (необязательна, по умолчанию false).
 
 ## Запуск
 
-1. Добавить файл `.env`, заполненный по образцу (`.env.example`)
-2. Создать пустую БД (`CREATE DATABASE ichecker;`) и прописать её в `POSTGRES_URL` и `DATABASE_URL`
-3. Прописать в папке проекта `bun install`
+1. Добавить файл `.env`, заполненный по образцу (`.env.example`) с адресом будущей базы в `POSTGRES_URL`
+2. Прописать в папке проекта `bun install`
+3. Создать БД с таблицами командой (берёт всё из `POSTGRES_URL`, повторный запуск безопасен):
+
+```sh
+bun run db:create
+```
 4. Прописать в папке проекта `bun run build_server`
 5. Прописать `pm2 start server --name iChecker` (находясь в папке проекта, либо путь до server)
 6. Прописать `pm2 save`
@@ -43,6 +46,7 @@ Telegram-бот, который следит за реестром Минюст�
 | --- | --- |
 | `bun run dev` | запуск в watch-режиме (`01-app/index.ts`) |
 | `bun run build_server` | сборка бинарника `./server` (`--compile`, `--minify`) |
+| `bun run db:create` | создать БД из `POSTGRES_URL` и применить миграции — таблицы на месте (если их ещё нет) |
 | `bun run migrate` | применить миграции (bunsql-native-migrate up) |
 | `bun run migrate:status` | статус миграций |
 | `bun run migrate:mark` | baseline: пометить все миграции применёнными без выполнения |
@@ -78,6 +82,8 @@ Restore меняет только данные таблиц `agents` и `info`, 
 bun run unpack backups/ichecker-cards-ГГГГММДД-ЧЧММсс.tar.gz
 ```
 
+Архив распаковывается в `uploads/` каталога, из которого выполняется команда, — по умолчанию это каталог проекта, он же рабочая директория бота. Бот отдаёт карточки по пути `process.cwd()/uploads/<имя файла из info.img>`, поэтому распаковывать нужно именно туда: внутри архива файлы лежат без префикса каталога, и `unpack` доливает их поверх существующих, ничего не удаляя. Без распакованного архива база консистентна, но карточки агентов без файлов в `uploads/` не отправятся.
+
 Если заливка упала посреди `pg_restore`, база может остаться залитой частично. Повторный запуск `bun run restore` безопасен: перед заливкой он снова очищает таблицы через `TRUNCATE`.
 
 ## Перенос на новый сервер
@@ -95,8 +101,8 @@ bun run pack
 
 1. `git clone <репозиторий>` и перейти в каталог проекта
 2. Создать `.env` по образцу `.env.example`
-3. Создать пустую БД (`CREATE DATABASE ichecker;`) и прописать её в `POSTGRES_URL` и `DATABASE_URL`
-4. `bun install`
+3. `bun install`
+4. Создать БД с таблицами командой `bun run db:create` (адрес базы — в `POSTGRES_URL` из `.env`)
 5. `bun run build_server`
 6. `bun run restore backups/ichecker-db-....dump` — миграции применит сам restore
 7. `bun run unpack backups/ichecker-cards-....tar.gz`

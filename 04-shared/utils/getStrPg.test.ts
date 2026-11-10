@@ -1,4 +1,4 @@
-import {test, expect, describe} from "bun:test";
+import {test, expect} from "bun:test";
 import getStrPg from "./getStrPg";
 import {AgentInfo} from "../../02-handlers/dto";
 
@@ -47,7 +47,7 @@ test("getStrPg: не-строковые значения не экранирую
 test("getStrPg: несколько агентов объединяются через запятую", () => {
     const result = getStrPg([makeAgent({field_1_i: 1}), makeAgent({field_1_i: 2})]);
 
-    expect(result.match(/\),\(/g)).toHaveLength(1);
+    expect(result.match(/\),\(/gu)).toHaveLength(1);
     expect(result).toContain(`'1'`);
     expect(result).toContain(`'2'`);
 });

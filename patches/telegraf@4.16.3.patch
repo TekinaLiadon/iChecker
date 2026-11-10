@@ -1,0 +1,15 @@
+diff --git a/lib/core/network/client.js b/lib/core/network/client.js
+index 25fbbbb47c7f88e83ae26f629e5ae1a0c141725c..3f08edbc85d401bddf236104bd64150d7c97b26e 100644
+--- a/lib/core/network/client.js
++++ b/lib/core/network/client.js
+@@ -245,7 +245,9 @@ async function answerToWebhook(response, payload, options) {
+     return true;
+ }
+ function redactToken(error) {
+-    error.message = error.message.replace(/\/(bot|user)(\d+):[^/]+\//, '/$1$2:[REDACTED]/');
++    try {
++        error.message = error.message.replace(/\/(bot|user)(\d+):[^/]+\//, '/$1$2:[REDACTED]/');
++    } catch {}
+     throw error;
+ }
+ class ApiClient {

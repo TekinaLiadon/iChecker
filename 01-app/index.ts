@@ -13,9 +13,7 @@ const processingError = async (callback: any) => {
 
 const manager = new AgentsManager();
 
-(async () => {
-    await processingError(manager.startService.bind(manager))
-})()
+await processingError(manager.startService.bind(manager))
 
 const signals = process as NodeJS.EventEmitter
 

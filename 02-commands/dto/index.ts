@@ -1,9 +1,9 @@
 
 
 export interface IBot {
-        start(ctx: any): Promise<void>;
-        help(ctx: any): Promise<void>;
-        online(ctx: any): Promise<void>;
+        start(ctx: any): void;
+        help(ctx: any): void;
+        online(ctx: any): void;
         search(ctx: any, isShort: boolean): Promise<void>;
         searchFilm(ctx: any): Promise<void>;
         addLink(ctx: any): Promise<void>;

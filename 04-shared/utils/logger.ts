@@ -37,8 +37,8 @@ class LoggerConsole implements ILogger {
     }
 }
 
-export class FabricLogger {
-    static createLogger(): ILogger {
+export const FabricLogger = {
+    createLogger(): ILogger {
         return envSchema.shape.IS_DEV.parse(process.env.IS_DEV) ? new LoggerConsole() : new LoggerFile()
     }
 }

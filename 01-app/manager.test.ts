@@ -1,4 +1,4 @@
-import {test, expect, describe, mock, beforeEach, afterEach, setSystemTime} from "bun:test";
+import {test, expect, describe, mock, afterEach, setSystemTime} from "bun:test";
 import AgentsManager from "./manager";
 import env from "../04-shared/utils/config";
 
@@ -168,11 +168,11 @@ describe("AgentsManager — settingBot", () => {
         const manager = new AgentsManager();
         const registered: string[] = [];
         manager.bot = {
-            start: (h: unknown) => registered.push("start"),
-            help: (h: unknown) => registered.push("help"),
+            start: (_h: unknown) => registered.push("start"),
+            help: (_h: unknown) => registered.push("help"),
             command: (c: string) => registered.push(`command:${c}`),
             on: (e: string) => registered.push(`on:${e}`),
-            action: (p: unknown) => registered.push("action"),
+            action: (_p: unknown) => registered.push("action"),
             launch: () => {},
         } as unknown as AgentsManager["bot"];
 
@@ -267,10 +267,10 @@ describe("AgentsManager — sendMessage", () => {
 
         await manager.sendMessage();
 
-        expect(sendMessage.mock.calls[0][2].reply_markup.inline_keyboard).toEqual([
+        expect(sendMessage.mock.calls[0]?.[2]?.reply_markup.inline_keyboard).toEqual([
             [{text: "Редактирование описания", callback_data: "editdesc_11"}],
         ]);
-        expect(sendMessage.mock.calls[1][2].reply_markup.inline_keyboard).toEqual([
+        expect(sendMessage.mock.calls[1]?.[2]?.reply_markup.inline_keyboard).toEqual([
             [{text: "Редактирование описания", callback_data: "editdesc_22"}],
         ]);
     });

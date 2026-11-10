@@ -25,7 +25,9 @@ const captureStdout = async (run: () => void): Promise<string> => {
 
     try {
         run();
-        await new Promise(resolve => setImmediate(resolve));
+        await new Promise((resolve) => {
+            setImmediate(resolve)
+        });
     } finally {
         process.stdout.write = originalWrite;
     }

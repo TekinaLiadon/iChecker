@@ -1,7 +1,7 @@
 import type {AgentInfo} from "../../02-handlers/dto";
 
 export default (fullAgentsList: AgentInfo[]) => {
-    const escapePG = (str: AgentInfo[keyof AgentInfo]) => typeof str === "string" ? str.replace(/'/g, "''") : str;
+    const escapePG = (str: AgentInfo[keyof AgentInfo]) => typeof str === "string" ? str.replaceAll("'", "''") : str;
 
     const values = fullAgentsList
         .map(item => `(

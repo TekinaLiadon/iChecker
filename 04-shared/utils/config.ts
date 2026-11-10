@@ -3,7 +3,7 @@ import {z} from "zod";
 export const envSchema = z.object({
     BOT_TOKEN: z.string().min(1),
     BOT_CHAT: z.coerce.number().int().refine(value => value !== 0),
-    POSTGRES_URL: z.url({protocol: /^postgres(ql)?$/}),
+    POSTGRES_URL: z.url({protocol: /^postgres(ql)?$/u}),
     KINOPOISK_TOKEN: z.string().min(1),
     IS_DEV: z.stringbool().default(false),
 });

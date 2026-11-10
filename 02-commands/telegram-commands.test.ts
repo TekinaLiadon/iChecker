@@ -48,7 +48,7 @@ describe("TelegramBot — start/help/online", () => {
 
         await bot.help(ctx);
 
-        const text = (ctx.reply as ReturnType<typeof mock>).mock.calls[0][0] as string;
+        const text = (ctx.reply as ReturnType<typeof mock>).mock.calls[0]?.[0] as string;
         expect(text).toContain("/search");
         expect(text).toContain("/table");
         expect(text).toContain("/add_link");
@@ -401,7 +401,7 @@ describe("TelegramBot — addPhoto", () => {
     test("сохраняет фото из разрешённого чата", async () => {
         const ctx = {
             message: {
-                chat: {id: "-1003091959045"},
+                chat: {id: -1003091959045},
                 caption: "/edit_photo Иванов",
                 photo: [{}],
             },
@@ -435,7 +435,7 @@ describe("TelegramBot — addPhoto", () => {
     test("подпись не та — тихий выход", async () => {
         const ctx = {
             message: {
-                chat: {id: "-1003091959045"},
+                chat: {id: -1003091959045},
                 caption: "/other_command Иванов",
                 photo: [{}],
             },
@@ -451,7 +451,7 @@ describe("TelegramBot — addPhoto", () => {
     test("без имени — ошибка", async () => {
         const ctx = {
             message: {
-                chat: {id: "-1003091959045"},
+                chat: {id: -1003091959045},
                 caption: "/edit_photo",
                 photo: [{}],
             },
@@ -471,7 +471,7 @@ describe("TelegramBot — addPhoto", () => {
         } as unknown as TelegramBot["db"];
         const ctx = {
             message: {
-                chat: {id: "-1003091959045"},
+                chat: {id: -1003091959045},
                 caption: "/edit_photo Иванов",
                 photo: [{}],
             },
@@ -546,7 +546,7 @@ describe("TelegramBot — savePhoto", () => {
             telegram: {getFile: mock()},
         } as unknown as Context;
 
-        expect(bot.savePhoto(ctx, 1)).rejects.toThrow("Фото не найдено");
+        await expect(bot.savePhoto(ctx, 1)).rejects.toThrow("Фото не найдено");
     });
 });
 

@@ -43,7 +43,7 @@ describe("AgentMinjust — getAgent", () => {
 
         await minjust.getAgent(400);
 
-        const options = (global.fetch as unknown as ReturnType<typeof mock>).mock.calls[0][1] as RequestInit;
+        const options = (global.fetch as unknown as ReturnType<typeof mock>).mock.calls[0]?.[1] as RequestInit;
         const body: Body = JSON.parse(options.body as string);
         expect(body.offset).toBe(400);
         expect(body.limit).toBe(200);
@@ -56,7 +56,7 @@ describe("AgentMinjust — getAgent", () => {
 
         await minjust.getAgent();
 
-        const options = (global.fetch as unknown as ReturnType<typeof mock>).mock.calls[0][1] as RequestInit;
+        const options = (global.fetch as unknown as ReturnType<typeof mock>).mock.calls[0]?.[1] as RequestInit;
         const body: Body = JSON.parse(options.body as string);
         expect(body.offset).toBe(0);
     });
@@ -188,11 +188,11 @@ describe("AgentMinjust — getAgentsList", () => {
 });
 
 describe("AgentMinjust — ретраи", () => {
-    const originalFetch = global.fetch;
+    const retriesOriginalFetch = global.fetch;
     const originalSetTimeout = globalThis.setTimeout;
 
     afterEach(() => {
-        global.fetch = originalFetch;
+        global.fetch = retriesOriginalFetch;
         globalThis.setTimeout = originalSetTimeout;
     });
 
